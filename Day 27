@@ -1,0 +1,112 @@
+785)is-graph-bipartie
+
+# BFS APPROACH
+class Solution:
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        V = len(graph)
+        color = [-1]*V
+        for i in range(V):
+            if color[i] == -1:
+                q = collections.deque()
+                q.append(i)
+                color[i] = 1
+                while q:
+                    curNode = q.popleft()
+                    curColor = color[curNode]
+                    for nei in graph[curNode]:
+                        if color[nei] == curColor:
+                            return False
+                        if color[nei] == -1:
+                            color[nei] = 1 - curColor
+                            q.append(nei)
+        return True
+
+# DFS APPROACH
+class Solution1:
+    def dfs(self, adj, curNode, color, curColor):
+        color[curNode] = curColor
+        for nei in adj[curNode]:
+            if color[nei] == curColor:
+                return False
+            if color[nei] == -1:
+                color[nei] = 1 - curColor
+                if self.dfs(adj, nei, color, color[nei]) == False:
+                    return False
+        return True
+
+    def isBipartite(self, graph: List[List[int]]) -> bool:
+        V = len(graph)
+        color = [-1]*V
+        for node in range(V):
+            if color[node] == -1:
+                if self.dfs(graph, node, color, 0) == False:
+                    return False
+        return True
+
+261)graph-valid-tree
+
+class Solution:
+    def validTree(self, n: int, edges: list[list[int]]) -> bool:
+        if len(edges) != n - 1:
+            return False
+
+        parent = list(range(n))
+        rank = [1] * n
+
+        def find(x):
+            while x != parent[x]:
+                parent[x] = parent[parent[x]]  # Path compression
+                x = parent[x]
+            return x
+
+        def union(x, y):
+            rootX, rootY = find(x), find(y)
+            if rootX == rootY:
+                return False  # Cycle detected
+            if rank[rootX] < rank[rootY]:
+                parent[rootX] = rootY
+            elif rank[rootX] > rank[rootY]:
+                parent[rootY] = rootX
+            else:
+                parent[rootY] = rootX
+                rank[rootX] += 1
+            return True
+
+        for u, v in edges:
+            if not union(u, v):
+                return False  # Found a cycle
+
+        return True  # All connected & no cycles
+
+323)number-of-connected-components-in-an-undirected-graph
+
+class Solution:
+    def countComponents(self, n: int, edges: list[list[int]]) -> int:
+        parent = list(range(n))
+        rank = [1] * n
+
+        def find(x):
+            while x != parent[x]:
+                parent[x] = parent[parent[x]]
+                x = parent[x]
+            return x
+
+        def union(x, y):
+            rootX, rootY = find(x), find(y)
+            if rootX == rootY:
+                return False
+            if rank[rootX] < rank[rootY]:
+                parent[rootX] = rootY
+            elif rank[rootX] > rank[rootY]:
+                parent[rootY] = rootX
+            else:
+                parent[rootY] = rootX
+                rank[rootX] += 1
+            return True
+
+        for u, v in edges:
+            union(u, v)
+
+        # Count unique roots
+        roots = {find(i) for i in range(n)}
+        return len(roots)
